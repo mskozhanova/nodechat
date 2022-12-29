@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Socket</title>
+    <script src="https://cdn.socket.io/4.2.0/socket.io.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="client_nick_div"></div>
+  <input id="input" type="text" autofocus>
+  <input id="client_id" type="hidden" value="" />
+  <input id="client_nick" type="hidden" value="" />
+  <button id="button">Send</button>
+  <div id="messages"></div>
+
+  <script>
+    const socket = io('localhost:5555');
+    const messageBlock = document.querySelector('#messages')
+    const sendButton = document.querySelector('#button')
+    const inputMessage = document.querySelector('#input')
+    const clientIdField = document.querySelector('#client_id')
+    const clientNickField = document.querySelector('#client_nick')
+    const clientNickDiv = document.querySelector('#client_nick_div')
+
+    sendButton.addEventListener('click', () => {
+        if(inputMessage.value.trim().length == 0)
+        {
+            return
+        }
+        const data = {
+            message: inputMessage.value.trim(),
+            nick: clientNickField.value
+        }
+        socket.emit('client-msg', data)
+    });
+
+    socket.on('server-nick', nick => {
+        console.log('nick', nick)
+        clientNickField.value = nick
+        clientNickDiv.innerText = `My nick is ${nick}`
+    })
+
+    socket.on('connect', () => {
+        console.log(`connected client ${socket.id}`)
+        console.log(`connected - ${socket.connected}`)
+        clientIdField.value = socket.id
+        socket.emit('client-connect', socket.id)
+    })
+
+    socket.on('disconnect', () => {
+        console.log('disconnected client')
+        socket.emit('client-disconnect', clientNickField.value)
+    })
+
+    socket.on('reconnect', () => {
+        console.log('reconnected client')
+        socket.emit('client-reconnect', clientNickField.value)
+    })
+
+    socket.on('server-msg', data => {
+        sendMsg(data)
+    })
+
+    const sendMsg = (data) =>
+    {
+        //console.log(data, messageBlock)
+        messageBlock
+            .insertAdjacentHTML(
+                'afterbegin',
+                `<div class="` + (data.system === true ? 'system' : '') + (data.css ? ' ' + data.css : '') + `">${data.nick}: ${data.message}</div>`
+            )
+    }
+  </script>
+
+</body>
+</html>

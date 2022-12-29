@@ -1,0 +1,25 @@
+#client_nick_div
+{
+    font-weight: bold;
+}
+#messages > div
+{
+    margin: 10px
+}
+#messages > div.system
+{
+    font-style: italic;
+    color: blue;
+}
+#messages > div.system.arrived
+{
+    color: blue;
+}
+#messages > div.system.gone
+{
+    color: red;
+}
+#messages > div.system.returned
+{
+    color: green;
+}
